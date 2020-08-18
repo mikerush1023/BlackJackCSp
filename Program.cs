@@ -1,179 +1,216 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-namespace BlackjackCS
+namespace Blackjack
 {
-    class Card
+    class Hand
     {
-        public string Name { get; set; }
-        public int CardValue(string name)
+        public List<Card> Cards = new List<Card>();
+
+        public int TotalValue()
         {
-            if (name.Contains("Ace"))
+            var total = 0;
+            foreach (var card in Cards)
             {
-                return 11;
+                total = total + card.Value();
             }
-            else if (name.Contains("2"))
+            return total;
+        }
+
+        public bool Busted()
+        {
+            if (TotalValue() > 21)
             {
-                return 2;
-            }
-            else if (name.Contains("3"))
-            {
-                return 3;
-            }
-            else if (name.Contains("4"))
-            {
-                return 4;
-            }
-            else if (name.Contains("5"))
-            {
-                return 5;
-            }
-            else if (name.Contains("6"))
-            {
-                return 6;
-            }
-            else if (name.Contains("7"))
-            {
-                return 7;
-            }
-            else if (name.Contains("8"))
-            {
-                return 8;
-            }
-            else if (name.Contains("9"))
-            {
-                return 9;
+                return true;
             }
             else
             {
-                return 10;
+                return false;
             }
+        }
+
+        public void Display()
+        {
+            foreach (var card in Cards)
+            {
+                Console.WriteLine($"The {card.Face} of {card.Suit}");
+            }
+            Console.WriteLine($"The total is: {TotalValue()}");
+            Console.WriteLine();
+        }
+
+        public void AddCardToHand(Card cardToAdd)
+        {
+            Cards.Add(cardToAdd);
+        }
+    }
+    class Card
+    {
+
+        public string Face { get; set; }
+
+        public string Suit { get; set; }
+
+        public int Value()
+        {
+            var answer = 0;
+            switch (Face)
+            {
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8":
+                case "9":
+                case "10":
+                    answer = int.Parse(Face);
+                    break;
+
+
+                case "J":
+                case "Q":
+                case "K":
+                    answer = 10;
+                    break;
+
+
+                case "A":
+                    answer = 11;
+                    break;
+
+            }
+            return answer;
         }
     }
     class Program
     {
-        static void Greeting()
+        static void Main(string[] args)
         {
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("====Welcome to Blackjack ====");
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-        }
-        static int Value(string name)
-        {
-            if (name.Contains("Ace"))
+            var deck = new List<Card>();
+
+            var suits = new List<string>() { "Club", "Diamond", "Heart", "Spade" };
+
+            var faces = new List<string>() { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
+
+            foreach (var suit in suits)
             {
-                return 11;
+
+                foreach (var face in faces)
+
+                {
+
+                    var ourCard = new Card()
+                    {
+                        Face = face,
+                        Suit = suit,
+                    };
+
+                    deck.Add(ourCard);
+                }
             }
-            else if (name.Contains("2"))
+
+            var n = deck.Count();
+
+            for (var rightIndex = n - 1; rightIndex >= 1; rightIndex--)
             {
-                return 2;
+                var randomNumberGenerator = new Random();
+
+                var leftIndex = randomNumberGenerator.Next(rightIndex);
+
+                var leftCard = deck[rightIndex];
+
+                var rightCard = deck[leftIndex];
+
+                deck[rightIndex] = rightCard;
+
+                deck[leftIndex] = leftCard;
             }
-            else if (name.Contains("3"))
+
+            var player = new Hand();
+
+            var dealer = new Hand();
+
+            var firstCardForPlayer = deck[0];
+
+            deck.Remove(firstCardForPlayer);
+
+            player.AddCardToHand(firstCardForPlayer);
+
+            var secondCardForPlayer = deck[0];
+            deck.Remove(secondCardForPlayer);
+            player.AddCardToHand(secondCardForPlayer);
+
+            var firstCardForDealer = deck[0];
+            deck.Remove(firstCardForDealer);
+            dealer.AddCardToHand(firstCardForDealer);
+
+            var secondCardForDealer = deck[0];
+            deck.Remove(secondCardForDealer);
+            dealer.AddCardToHand(secondCardForDealer);
+
+            var choice = "";
+            while (choice != "STAND" && !player.Busted())
             {
-                return 3;
+                Console.WriteLine("~~~~~ PLAYER ~~~~~");
+                player.Display();
+
+
+                Console.WriteLine();
+                Console.Write("HIT or STAND? ");
+                choice = Console.ReadLine();
+
+                if (choice == "HIT")
+                {
+                    var additionalCard = deck[0];
+                    deck.Remove(additionalCard);
+                    player.AddCardToHand(additionalCard);
+                }
+
             }
-            else if (name.Contains("4"))
+
+            Console.WriteLine("~~~~~ PLAYER ~~~~~");
+            player.Display();
+
+            while (!player.Busted() && dealer.TotalValue() < 17)
             {
-                return 4;
+                var additionalCard = deck[0];
+                deck.Remove(additionalCard);
+                dealer.AddCardToHand(additionalCard);
             }
-            else if (name.Contains("5"))
+
+            Console.WriteLine("~~~~ DEALER ~~~~");
+            dealer.Display();
+            if (player.Busted())
             {
-                return 5;
-            }
-            else if (name.Contains("6"))
-            {
-                return 6;
-            }
-            else if (name.Contains("7"))
-            {
-                return 7;
-            }
-            else if (name.Contains("8"))
-            {
-                return 8;
-            }
-            else if (name.Contains("9"))
-            {
-                return 9;
+                Console.WriteLine("Dealer Wins!");
             }
             else
             {
-                return 10;
-            }
-        }
-        static void Main(string[] args)
-        {
-            Greeting();
-            var index = 0;
-            var deck = new List<string> { "King Clubs", "6 Hearts", "10 Spades", "9 Spades", "Ace Spades", "King Hearts", "5 Spades", "2 Hearts", "10 Hearts", "Ace Clubs", "2 Clubs", "3 Spades", "9 Clubs", "7 Diamonds", "King Diamonds", "7 Hearts", "3 Diamonds", "Jack Diamonds", "5 Diamonds", "4 Hearts", "10 Clubs", "King Spades", "8 Hearts", "4 Diamonds", "9 Diamonds", "6 Spades", "4 Clubs", "7 Clubs", "5 Clubs", "7 Spades", "Jack Spades", "2 Diamonds", "6 Diamonds", "10 Diamonds", "Queen Clubs", "Queen Hearts", "Ace Hearts", "Queen Diamonds", "3 Hearts", "Ace Diamonds", "Jack Clubs", "9 Hearts", "Queen Spades", "3 Clubs", "8 Diamonds", "Jack Hearts", "4 Spades", "8 Spades", "8 Clubs", "5 Hearts", "2 Spades", "6 Clubs" };
-            var playerHand = new List<Card>();
-            var houseHand = new List<Card>();
-            Console.WriteLine($"Player has {deck[2]} & {deck[3]}");
-            Console.WriteLine();
-            var playerScore = Value(deck[2]) + Value(deck[3]);
-            var houseScore = Value(deck[0]) + Value(deck[1]);
-            var playerkeepHitting = true;
-            var housekeepHitting = true;
-            while (playerkeepHitting)
-            {
-                Console.WriteLine("Do you want to hit? yes|no");
-                var answer = Console.ReadLine();
-                if (answer == "yes")
+                if (dealer.Busted())
                 {
-                    var newCard = new Card()
+                    Console.WriteLine("Player Wins");
+                }
+                else
+                {
+                    if (dealer.TotalValue() > player.TotalValue())
                     {
-                        Name = deck[index]
-                    };
-                    Console.WriteLine(newCard.Name);
-                    playerHand.Add(newCard);
-                    playerScore += newCard.CardValue(newCard.Name);
-                    if (playerScore > 21)
+                        Console.WriteLine("Dealer Wins!");
+                    }
+                    else
                     {
-                        Console.WriteLine("House Wins");
-                        playerkeepHitting = false;
-                        break;
+                        if (player.TotalValue() > dealer.TotalValue())
+                        {
+                            Console.WriteLine("Player Wins");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Tie goes to the Dealer");
+                        }
                     }
                 }
-                else
-                {
-                    Console.WriteLine("House plays");
-                    playerkeepHitting = false;
-                }
-                index++;
             }
-            while (housekeepHitting && houseScore < 17)
-            {
-                var newCard = new Card()
-                {
-                    Name = deck[index]
-                };
-                Console.WriteLine(newCard.Name);
-                houseHand.Add(newCard);
-                houseScore += newCard.CardValue(newCard.Name);
-                if (houseScore > 21)
-                {
-                    Console.WriteLine("Player Wins");
-                }
-                else if (houseScore > playerScore || houseScore == playerScore)
-
-                {
-                    Console.WriteLine("House Wins");
-                }
-                else
-                {
-                    Console.WriteLine("Player Wins");
-                }
-            }
-            index++;
         }
     }
 }
-
-
-
-
-
